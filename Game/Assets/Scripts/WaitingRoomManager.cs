@@ -21,12 +21,17 @@ public class WaitingRoomManager : MonoBehaviour
     void Start()
     {
         Vector2 spawnPosition = new Vector2(Random.Range(minSpawnValues.x, maxSpawnValues.x), Random.Range(minSpawnValues.y, maxSpawnValues.y));
-        PhotonNetwork.Instantiate(playerPrefab.name, spawnPosition, Quaternion.identity);
+        GameObject character = PhotonNetwork.Instantiate(playerPrefab.name, Vector2.zero, Quaternion.identity);
+        GameObject player = character.GetComponentInChildren<PlayerController>().body;
+        player.transform.position = spawnPosition;
 
         PhotonNetwork.CurrentRoom.MaxPlayers = (byte)maxNumberOfPlayers;
         currentNumerOfPlayers = PhotonNetwork.CurrentRoom.PlayerCount;
+
         PhotonNetwork.LocalPlayer.NickName = "Player " + currentNumerOfPlayers;
-        Debug.Log(PhotonNetwork.LocalPlayer.NickName);
+        PlayerController controller = player.GetComponent<PlayerController>();
+        controller.name = PhotonNetwork.LocalPlayer.NickName;
+        Debug.Log("Waiting Room");
     }
 
     // Update is called once per frame
