@@ -1612,7 +1612,7 @@ MonoBehaviour:
   startTimer: 3
   playersAlive: 0
   startTimerText: {fileID: 715712030}
-  playerPrefab: {fileID: 8120210248262442104, guid: b27e6fe5f16525d4bab31f8ae56f3335, type: 3}
+  playerPrefab: {fileID: 4521325113029022743, guid: 3be5fc08440082141804ddbcdceed730, type: 3}
   playerSpawnPositions:
   - {fileID: 781261703}
   - {fileID: 1951328054}

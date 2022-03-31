@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Photon.Pun;
+using Photon.Realtime;
+using Photon.Pun.UtilityScripts;
+using UnityEngine.SceneManagement;
 
-public class WaitingRoomManager : MonoBehaviour
+public class WaitingRoomManager : MonoBehaviourPunCallbacks
 {
     [Header("Player Spawn Info:")]
     public GameObject playerPrefab;
@@ -17,41 +20,108 @@ public class WaitingRoomManager : MonoBehaviour
     public bool isCountingDown;
     public int countDownTime;
 
+    [Header("Team Info")]
+    public int blueTeamCount;
+    public int redTeamCount;
+
+    private PhotonTeamsManager teamManager;
+    private PhotonTeam[] teams;
+    private PlayerController playerController;
+
+
     // Start is called before the first frame update
     void Start()
     {
+        teamManager = GetComponent<PhotonTeamsManager>();
+
         Vector2 spawnPosition = new Vector2(Random.Range(minSpawnValues.x, maxSpawnValues.x), Random.Range(minSpawnValues.y, maxSpawnValues.y));
-        GameObject character = PhotonNetwork.Instantiate(playerPrefab.name, Vector2.zero, Quaternion.identity);
+        GameObject character = PhotonNetwork.Instantiate(playerPrefab.name, spawnPosition, Quaternion.identity);
         GameObject player = character.GetComponentInChildren<PlayerController>().body;
-        player.transform.position = spawnPosition;
 
         PhotonNetwork.CurrentRoom.MaxPlayers = (byte)maxNumberOfPlayers;
         currentNumerOfPlayers = PhotonNetwork.CurrentRoom.PlayerCount;
 
-        PhotonNetwork.LocalPlayer.NickName = "Player " + currentNumerOfPlayers;
-        PlayerController controller = player.GetComponent<PlayerController>();
-        controller.name = PhotonNetwork.LocalPlayer.NickName;
-        Debug.Log("Waiting Room");
+        PhotonNetwork.LocalPlayer.NickName = PlayerPrefs.GetString("PlayerName");
+        playerController = player.GetComponent<PlayerController>();
+
+        playerController.name = PhotonNetwork.LocalPlayer.NickName;
+
+        teams = teamManager.GetAvailableTeams();
+
+        AssignTeam();
     }
 
     // Update is called once per frame
     void Update()
     {
-        PlayerCount();
+        TeamCount();
+        updatePlayerList();
     }
 
-    private void PlayerCount()
+    private void updatePlayerList()
+    {
+        blueTeamCount = 0;
+        redTeamCount = 0;
+
+        foreach (KeyValuePair<int, Player> player in PhotonNetwork.CurrentRoom.Players)
+        {
+            PhotonTeam playersTeam = player.Value.GetPhotonTeam();
+
+            if (playersTeam == teams[0])
+            {
+                blueTeamCount++;
+            }
+            else if (playersTeam == teams[1])
+            {
+                redTeamCount++;
+            }
+
+            //Debug.Log("Name: " + player.Value.NickName + "Team: " + playersTeam);
+        }
+    }
+
+    private void AssignTeam()
+    {
+        foreach (KeyValuePair<int, Player> player in PhotonNetwork.CurrentRoom.Players)
+        {
+            PhotonTeam playersTeam = player.Value.GetPhotonTeam();
+
+            Debug.Log("Name: " + player.Value.NickName + "Team: " + playersTeam);
+
+            if (playersTeam == teams[0])
+            {
+                blueTeamCount++;
+            }
+            else if (playersTeam == teams[1])
+            {
+                redTeamCount++;
+            }
+        }
+
+        if (blueTeamCount <= redTeamCount || blueTeamCount == redTeamCount)
+        {
+            PhotonNetwork.LocalPlayer.JoinTeam("Blue");
+            blueTeamCount++;
+        }
+        else
+        {
+            PhotonNetwork.LocalPlayer.JoinTeam("Red");
+            redTeamCount++;
+        }
+    }
+
+    private void TeamCount()
     {
         currentNumerOfPlayers = PhotonNetwork.CurrentRoom.PlayerCount;
 
-        if(currentNumerOfPlayers == maxNumberOfPlayers && !isCountingDown)
+        if(blueTeamCount == redTeamCount && !isCountingDown && currentNumerOfPlayers != 1)
         {
             StartCoroutine(CountDown());
         }
         
-        if(!isCountingDown && currentNumerOfPlayers != maxNumberOfPlayers)
+        if(!isCountingDown && blueTeamCount != redTeamCount)
         {
-            playerCountText.text = "Players Needed:\n" + (maxNumberOfPlayers - currentNumerOfPlayers);
+            playerCountText.text = "Players Needed:\n" + (Mathf.Abs(blueTeamCount - redTeamCount));
         }
     }
 
@@ -62,7 +132,7 @@ public class WaitingRoomManager : MonoBehaviour
 
         while (i > 0) 
         {
-            if(currentNumerOfPlayers != maxNumberOfPlayers)
+            if(blueTeamCount != redTeamCount)
             {
                 isCountingDown = false;
                 break;
@@ -74,8 +144,20 @@ public class WaitingRoomManager : MonoBehaviour
 
             if(i == 0)
             {
-                PhotonNetwork.LoadLevel("Game");
+                //PhotonNetwork.LoadLevel("Game");
+                Debug.Log("start game");
             }
         }
+    }
+
+    public void StateOfPause()
+    {
+        playerController.isPaused = !playerController.isPaused;
+    }
+
+    public void ChangeScene(string scene)
+    {
+        PhotonNetwork.LeaveRoom();
+        SceneManager.LoadScene(scene, LoadSceneMode.Single);
     }
 }

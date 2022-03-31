@@ -6,34 +6,55 @@ using UnityEngine.UI;
 
 public class MultiplayerManager : MonoBehaviourPunCallbacks
 {
-    public InputField createRoom, joinRoom;
-    public GameObject gameModes, createAndJoinMenu, connectionErrorText;
+    public InputField createRoom, joinRoom, playerName;
+    public GameObject startMenu, gameModes, createAndJoinMenu, errorTextGameObject, loadingTextGameObject;
+    public Text errorText;
     public float connectionErrorTime;
 
     // Start is called before the first frame update
     void Start()
     {
-        PhotonNetwork.ConnectUsingSettings();
+        errorText.GetComponent<Text>();
+        playerName.text = PlayerPrefs.GetString("PlayerName");
+
+        if (!PhotonNetwork.IsConnected)
+        {
+            PhotonNetwork.ConnectUsingSettings();
+        }
     }
 
     public void CheckConnection()
     {
         if (PhotonNetwork.IsConnectedAndReady)
         {
-            gameModes.SetActive(false);
-            createAndJoinMenu.SetActive(true);
+            errorText.text = "Connection Error: Check Internet Connection";
+
+            if (playerName.text != "")
+            {
+                startMenu.SetActive(false);
+                StartCoroutine(LoadingLobby());
+            }
+            else
+            {
+                errorText.text = "Insert A Name";
+                StartCoroutine(DisplayError());
+                return;
+            }
+            
+            PlayerPrefs.SetString("PlayerName", playerName.text);
         }
         else
         {
-            StartCoroutine(DisplayConnectionError());
+
+            StartCoroutine(DisplayError());
         }
     }
 
-    IEnumerator DisplayConnectionError()
+    IEnumerator DisplayError()
     {
-        connectionErrorText.SetActive(true);
+        errorTextGameObject.SetActive(true);
         yield return new WaitForSeconds(connectionErrorTime);
-        connectionErrorText.SetActive(true);
+        errorTextGameObject.SetActive(false);
     }
 
     public override void OnConnectedToMaster()
@@ -41,9 +62,36 @@ public class MultiplayerManager : MonoBehaviourPunCallbacks
         PhotonNetwork.JoinLobby();
     }
 
+    public IEnumerator LoadingLobby()
+    {
+        while (true)
+        {
+            yield return null;
+
+            if (PhotonNetwork.InLobby)
+            {
+                loadingTextGameObject.SetActive(false);
+                createAndJoinMenu.SetActive(true);
+                break;
+            }
+            else
+            {
+                loadingTextGameObject.SetActive(true);
+            }
+        }
+    }
+
     public void CreateRoom()
     {
-        PhotonNetwork.CreateRoom(createRoom.text);
+        if (createRoom.text != "" )
+        {
+            PhotonNetwork.CreateRoom(createRoom.text);
+        }
+        else
+        {
+            errorText.text = "Insert A Name";
+            StartCoroutine(DisplayError());
+        }
     }
 
     public void JoinRoom()

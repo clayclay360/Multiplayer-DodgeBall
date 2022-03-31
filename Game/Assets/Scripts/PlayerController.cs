@@ -3,33 +3,35 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Photon.Pun;
+using Photon.Realtime;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour, IPunObservable
 {
     [Header("Player Variables:")]
     public string name;
     public float speed;
     public float clampMagnitude;
-    public GameObject body;
-    public bool isAlive;
+    public GameObject body, playerBall;
+    public bool isAlive, isPaused, hasBall;
+
 
     [Header("UI Variables:")]
     public Text nameText;
     public GameObject canvas;
 
+    [Header("Ball Variables:")]
+    public GameObject dodgeBallPrefab;
+    public Transform dodgeBallSpawnTransform;
+    public float power;
+
     private float xScaleLeft;
     private float xScaleRight;
-    private Vector2 canvasOffset;
 
     private Rigidbody2D rb;
     private PhotonView view;
     private GameManager gameManager;
     private Animator animator;
-
-    private void Awake()
-    {
-        canvasOffset = transform.position - canvas.transform.position;
-    }
+    private Vector3 mouse_pos;
 
     // Start is called before the first frame update
     void Start()
@@ -43,10 +45,8 @@ public class PlayerController : MonoBehaviour
         xScaleRight = transform.localScale.x;
         xScaleLeft = -transform.localScale.x;
 
-        //canvasOffset = transform.position - canvas.transform.position;
-
         addPlayer();
-        nameText.text = name;
+        nameText.text = view.Owner.NickName;
     }
 
     private void addPlayer()
@@ -62,14 +62,27 @@ public class PlayerController : MonoBehaviour
     {
         if (view.IsMine)
         {
-            Movement();
-            CanvasMovement();
+            if (!isPaused)
+            {
+                Movement();
+            }
+
+            DisplayBall();
         }
     }
 
-    private void CanvasMovement()
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
-        canvas.transform.position = (Vector2)transform.position + canvasOffset;
+        if (stream.IsWriting)
+        {
+            stream.Serialize(ref hasBall);
+            stream.SendNext(playerBall.activeSelf);
+        }
+        else if (stream.IsReading)
+        {
+            hasBall = (bool)stream.ReceiveNext();
+            playerBall.SetActive((bool)stream.ReceiveNext());
+        }
     }
 
     private void Movement()
@@ -77,20 +90,72 @@ public class PlayerController : MonoBehaviour
         float move_x = Input.GetAxisRaw("Horizontal");
         float move_y = Input.GetAxisRaw("Vertical");
 
-        if (move_x < 0)
+        mouse_pos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        float dir_x = mouse_pos.x - transform.position.x;
+
+        if (/*move_x < 0*/ dir_x < 0)
         {
             transform.localScale = new Vector2(xScaleLeft, transform.localScale.y);
+            canvas.transform.localScale = new Vector3(-1, 1, 1);
         }
-        else if (move_x > 0)
+        else if (/*move_x > 0*/ dir_x > 0)
         {
             transform.localScale = new Vector2(xScaleRight, transform.localScale.y);
+            canvas.transform.localScale = new Vector3(1, 1, 1);
         }
 
         Vector2 movement = new Vector2(move_x, move_y);
         rb.AddForce(movement.normalized * speed * Time.deltaTime);
         rb.velocity = Vector2.ClampMagnitude(rb.velocity, clampMagnitude);
-
         
         animator.SetBool("Idle", isAlive);
+    }
+
+    private void DisplayBall()
+    {
+        if (hasBall)
+        {
+            playerBall.SetActive(true);
+
+            if (Input.GetMouseButtonDown(0) && !isPaused)
+            {
+                animator.SetTrigger("Throw");
+            }
+        }
+        else
+        {
+            playerBall.SetActive(false);
+        }
+    }
+
+    public void ThrowBall()
+    {
+        if (view.IsMine)
+        {
+            Vector2 dir = mouse_pos - dodgeBallSpawnTransform.position;
+            dir.Normalize();
+
+            GameObject ball = PhotonNetwork.Instantiate(dodgeBallPrefab.name, dodgeBallSpawnTransform.position, Quaternion.identity);
+            Rigidbody2D ballRigidBody = ball.GetComponent<Rigidbody2D>();
+            Collider2D ballCollider = ball.GetComponent<Collider2D>();
+
+            ballCollider.isTrigger = true;
+            hasBall = false;
+
+            //StartCoroutine(EnableTrigger(2f, ballCollider));
+            ball.GetComponent<DodeballScript>().canMove = true;
+            ballRigidBody.AddForce(dir * power);
+        }
+    }
+
+    IEnumerator EnableTrigger(float time, Collider2D col)
+    {
+        yield return new WaitForSeconds(time);
+        col.isTrigger = false;
+    }
+
+    public void DisableBall()
+    {
+        playerBall.SetActive(true);
     }
 }

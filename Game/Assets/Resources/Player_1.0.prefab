@@ -71,6 +71,10 @@ MonoBehaviour:
   name: 
   speed: 900
   clampMagnitude: 0
+  body: {fileID: 0}
+  isAlive: 0
+  nameText: {fileID: 0}
+  canvas: {fileID: 0}
 --- !u!114 &1744047075239059283
 MonoBehaviour:
   m_ObjectHideFlags: 0
