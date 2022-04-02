@@ -31,7 +31,7 @@ public class MultiplayerManager : MonoBehaviourPunCallbacks
 
             if (playerName.text != "")
             {
-                //
+                //take the player into the lobby
                 startMenu.SetActive(false);
                 StartCoroutine(LoadingLobby());
             }
