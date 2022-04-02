@@ -19,7 +19,7 @@ public class MultiplayerManager : MonoBehaviourPunCallbacks
 
         if (!PhotonNetwork.IsConnected)
         {
-            PhotonNetwork.ConnectUsingSettings();
+            PhotonNetwork.ConnectUsingSettings(); //connect to photon
         }
     }
 
@@ -31,22 +31,24 @@ public class MultiplayerManager : MonoBehaviourPunCallbacks
 
             if (playerName.text != "")
             {
+                //
                 startMenu.SetActive(false);
                 StartCoroutine(LoadingLobby());
             }
             else
             {
+                //display error if there's no name 
                 errorText.text = "Insert A Name";
                 StartCoroutine(DisplayError());
                 return;
             }
             
-            PlayerPrefs.SetString("PlayerName", playerName.text);
+            PlayerPrefs.SetString("PlayerName", playerName.text); //save the player name
         }
         else
         {
 
-            StartCoroutine(DisplayError());
+            StartCoroutine(DisplayError()); // display error not connected to photon
         }
     }
 
@@ -59,7 +61,7 @@ public class MultiplayerManager : MonoBehaviourPunCallbacks
 
     public override void OnConnectedToMaster()
     {
-        PhotonNetwork.JoinLobby();
+        PhotonNetwork.JoinLobby(); //when connected to master server, join lobby
     }
 
     public IEnumerator LoadingLobby()
@@ -70,12 +72,14 @@ public class MultiplayerManager : MonoBehaviourPunCallbacks
 
             if (PhotonNetwork.InLobby)
             {
+                //if in the lobby display the create and join menu
                 loadingTextGameObject.SetActive(false);
                 createAndJoinMenu.SetActive(true);
                 break;
             }
             else
             {
+                //if not in lobby, display loading screen
                 loadingTextGameObject.SetActive(true);
             }
         }
@@ -85,10 +89,12 @@ public class MultiplayerManager : MonoBehaviourPunCallbacks
     {
         if (createRoom.text != "" )
         {
+            //create room with the name 
             PhotonNetwork.CreateRoom(createRoom.text);
         }
         else
         {
+            //diesplay error if no name
             errorText.text = "Insert A Name";
             StartCoroutine(DisplayError());
         }
@@ -96,16 +102,16 @@ public class MultiplayerManager : MonoBehaviourPunCallbacks
 
     public void JoinRoom()
     {
-        PhotonNetwork.JoinRoom(joinRoom.text);
+        PhotonNetwork.JoinRoom(joinRoom.text); //join room by the name
     }
 
     public void FindRoom()
     {
-        PhotonNetwork.JoinRandomOrCreateRoom();
+        PhotonNetwork.JoinRandomOrCreateRoom(); //join or create a random room
     }
 
     public override void OnJoinedRoom()
     {
-        PhotonNetwork.LoadLevel("Waiting Room");
+        PhotonNetwork.LoadLevel("Waiting Room"); //on joined room, load the waiting room
     }
 }

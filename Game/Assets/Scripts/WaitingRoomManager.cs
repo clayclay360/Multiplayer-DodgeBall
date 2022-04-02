@@ -28,26 +28,28 @@ public class WaitingRoomManager : MonoBehaviourPunCallbacks
     private PhotonTeam[] teams;
     private PlayerController playerController;
 
-
     // Start is called before the first frame update
     void Start()
     {
         teamManager = GetComponent<PhotonTeamsManager>();
 
+        //spawn player
         Vector2 spawnPosition = new Vector2(Random.Range(minSpawnValues.x, maxSpawnValues.x), Random.Range(minSpawnValues.y, maxSpawnValues.y));
         GameObject character = PhotonNetwork.Instantiate(playerPrefab.name, spawnPosition, Quaternion.identity);
         GameObject player = character.GetComponentInChildren<PlayerController>().body;
 
+        //get the current number of players in the room
         PhotonNetwork.CurrentRoom.MaxPlayers = (byte)maxNumberOfPlayers;
         currentNumerOfPlayers = PhotonNetwork.CurrentRoom.PlayerCount;
-
+        
+        //add the players nickname
         PhotonNetwork.LocalPlayer.NickName = PlayerPrefs.GetString("PlayerName");
         playerController = player.GetComponent<PlayerController>();
-
         playerController.name = PhotonNetwork.LocalPlayer.NickName;
-
+        
+        //assign player to an available team
         teams = teamManager.GetAvailableTeams();
-
+        UpdatePlayerList();
         AssignTeam();
     }
 
@@ -55,14 +57,15 @@ public class WaitingRoomManager : MonoBehaviourPunCallbacks
     void Update()
     {
         TeamCount();
-        updatePlayerList();
+        UpdatePlayerList();
     }
 
-    private void updatePlayerList()
+    private void UpdatePlayerList()
     {
         blueTeamCount = 0;
         redTeamCount = 0;
 
+        //for each player get there team and add them to the teams count
         foreach (KeyValuePair<int, Player> player in PhotonNetwork.CurrentRoom.Players)
         {
             PhotonTeam playersTeam = player.Value.GetPhotonTeam();
@@ -75,29 +78,12 @@ public class WaitingRoomManager : MonoBehaviourPunCallbacks
             {
                 redTeamCount++;
             }
-
-            //Debug.Log("Name: " + player.Value.NickName + "Team: " + playersTeam);
         }
     }
 
     private void AssignTeam()
     {
-        foreach (KeyValuePair<int, Player> player in PhotonNetwork.CurrentRoom.Players)
-        {
-            PhotonTeam playersTeam = player.Value.GetPhotonTeam();
-
-            Debug.Log("Name: " + player.Value.NickName + "Team: " + playersTeam);
-
-            if (playersTeam == teams[0])
-            {
-                blueTeamCount++;
-            }
-            else if (playersTeam == teams[1])
-            {
-                redTeamCount++;
-            }
-        }
-
+        //assign local player to team with few players
         if (blueTeamCount <= redTeamCount || blueTeamCount == redTeamCount)
         {
             PhotonNetwork.LocalPlayer.JoinTeam("Blue");
@@ -113,12 +99,14 @@ public class WaitingRoomManager : MonoBehaviourPunCallbacks
     private void TeamCount()
     {
         currentNumerOfPlayers = PhotonNetwork.CurrentRoom.PlayerCount;
-
+        
+        //if both teams equal the same number of players, start the count down
         if(blueTeamCount == redTeamCount && !isCountingDown && currentNumerOfPlayers != 1)
         {
             StartCoroutine(CountDown());
         }
         
+        //output how many players are needed
         if(!isCountingDown && blueTeamCount != redTeamCount)
         {
             playerCountText.text = "Players Needed:\n" + (Mathf.Abs(blueTeamCount - redTeamCount));
@@ -130,6 +118,7 @@ public class WaitingRoomManager : MonoBehaviourPunCallbacks
         int i = countDownTime;
         isCountingDown = true;
 
+        //count down i until it is no longer greater than zero
         while (i > 0) 
         {
             if(blueTeamCount != redTeamCount)
@@ -142,7 +131,8 @@ public class WaitingRoomManager : MonoBehaviourPunCallbacks
             yield return new WaitForSeconds(1);
             i--;
 
-            if(i == 0)
+            //once i equals zero load the game scene
+            if (i == 0)
             {
                 //PhotonNetwork.LoadLevel("Game");
                 Debug.Log("start game");
@@ -157,6 +147,7 @@ public class WaitingRoomManager : MonoBehaviourPunCallbacks
 
     public void ChangeScene(string scene)
     {
+        //change to the scene given in the parameter
         PhotonNetwork.LeaveRoom();
         SceneManager.LoadScene(scene, LoadSceneMode.Single);
     }

@@ -20,7 +20,7 @@ public class PlayerController : MonoBehaviour, IPunObservable
     public GameObject canvas;
 
     [Header("Ball Variables:")]
-    public GameObject dodgeBallPrefab;
+    public GameObject dodgeBall;
     public Transform dodgeBallSpawnTransform;
     public float power;
 
@@ -68,11 +68,13 @@ public class PlayerController : MonoBehaviour, IPunObservable
             }
 
             DisplayBall();
+            //ChangeBallPosition();
         }
     }
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
+        //read and write state of the object
         if (stream.IsWriting)
         {
             stream.Serialize(ref hasBall);
@@ -87,12 +89,14 @@ public class PlayerController : MonoBehaviour, IPunObservable
 
     private void Movement()
     {
+        //get inputs
         float move_x = Input.GetAxisRaw("Horizontal");
         float move_y = Input.GetAxisRaw("Vertical");
 
         mouse_pos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         float dir_x = mouse_pos.x - transform.position.x;
 
+        //change scale depending on mouse position
         if (/*move_x < 0*/ dir_x < 0)
         {
             transform.localScale = new Vector2(xScaleLeft, transform.localScale.y);
@@ -104,19 +108,23 @@ public class PlayerController : MonoBehaviour, IPunObservable
             canvas.transform.localScale = new Vector3(1, 1, 1);
         }
 
+        //add force to the direction the player is going
         Vector2 movement = new Vector2(move_x, move_y);
         rb.AddForce(movement.normalized * speed * Time.deltaTime);
         rb.velocity = Vector2.ClampMagnitude(rb.velocity, clampMagnitude);
         
+        //play idle animation
         animator.SetBool("Idle", isAlive);
     }
 
     private void DisplayBall()
     {
+        //if the player has a ball, display the ball
         if (hasBall)
         {
             playerBall.SetActive(true);
 
+            //if player left clicks and is not paused, trigger the throwing animation
             if (Input.GetMouseButtonDown(0) && !isPaused)
             {
                 animator.SetTrigger("Throw");
@@ -128,30 +136,40 @@ public class PlayerController : MonoBehaviour, IPunObservable
         }
     }
 
+    public void GetBall(GameObject ball)
+    {
+        dodgeBall = ball;
+    }
+
+    public void ChangeBallPosition()
+    {
+        if(dodgeBall != null && hasBall)
+        {
+            dodgeBall.transform.position = dodgeBallSpawnTransform.position;
+        }
+    }
+
     public void ThrowBall()
     {
         if (view.IsMine)
         {
+            //get the direction
             Vector2 dir = mouse_pos - dodgeBallSpawnTransform.position;
             dir.Normalize();
 
-            GameObject ball = PhotonNetwork.Instantiate(dodgeBallPrefab.name, dodgeBallSpawnTransform.position, Quaternion.identity);
-            Rigidbody2D ballRigidBody = ball.GetComponent<Rigidbody2D>();
-            Collider2D ballCollider = ball.GetComponent<Collider2D>();
+            dodgeBall.transform.position = dodgeBallSpawnTransform.position;
+            dodgeBall.GetComponent<SpriteRenderer>().enabled = true;
+
+            Rigidbody2D ballRigidBody = dodgeBall.GetComponent<Rigidbody2D>();
+            Collider2D ballCollider = dodgeBall.GetComponent<Collider2D>();
 
             ballCollider.isTrigger = true;
             hasBall = false;
 
-            //StartCoroutine(EnableTrigger(2f, ballCollider));
-            ball.GetComponent<DodeballScript>().canMove = true;
+            //add force to the direction in which the ball is supposed to go
             ballRigidBody.AddForce(dir * power);
+            dodgeBall = null;
         }
-    }
-
-    IEnumerator EnableTrigger(float time, Collider2D col)
-    {
-        yield return new WaitForSeconds(time);
-        col.isTrigger = false;
     }
 
     public void DisableBall()

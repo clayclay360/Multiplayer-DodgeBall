@@ -22,6 +22,7 @@ public class GameMenuCanvasController : MonoBehaviour
 
     public void DodgeBallRotation(float speed)
     {
+        //rotate image
         dodgeballImage.rectTransform.Rotate(Vector3.forward * speed * Time.deltaTime);
     }
 }

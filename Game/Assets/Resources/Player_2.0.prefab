@@ -262,7 +262,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 833858340290377742, guid: 2720d5b5726740b43ba03963312144d3, type: 3}
       propertyPath: hasBall
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 833858340290377742, guid: 2720d5b5726740b43ba03963312144d3, type: 3}
       propertyPath: ballPrefab
