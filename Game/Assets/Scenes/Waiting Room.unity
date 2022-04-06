@@ -248,6 +248,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Ball
       objectReference: {fileID: 0}
+    - target: {fileID: 7757334719803975910, guid: 305ce238b2b1046428f16feb627d81a1, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 305ce238b2b1046428f16feb627d81a1, type: 3}
 --- !u!1 &241134112
@@ -2400,8 +2404,8 @@ CanvasRenderer:
 --- !u!1 &2059200871
 GameObject:
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 5501126015483507200, guid: 819f2b6b8a466bb47b10b0c8deb2062e, type: 3}
-  m_PrefabInstance: {fileID: 5501126017524243303}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
@@ -2418,8 +2422,8 @@ GameObject:
 --- !u!114 &2059200872
 MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 5501126015483507215, guid: 819f2b6b8a466bb47b10b0c8deb2062e, type: 3}
-  m_PrefabInstance: {fileID: 5501126017524243303}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2059200871}
   m_Enabled: 1
@@ -2428,8 +2432,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerPrefab: {fileID: 4521325113029022743, guid: 3be5fc08440082141804ddbcdceed730, type: 3}
-  maxSpawnValues: {x: 3, y: 2}
-  minSpawnValues: {x: -3, y: -2}
+  maxSpawnValues: {x: 5, y: 4}
+  minSpawnValues: {x: -5, y: -4}
   playerCountText: {fileID: 1157679502}
   currentNumerOfPlayers: 0
   maxNumberOfPlayers: 8
@@ -2437,12 +2441,12 @@ MonoBehaviour:
   countDownTime: 15
   blueTeamCount: 0
   redTeamCount: 0
-  sr: {fileID: 0}
+  ballPrefab: {fileID: 7757334719803975910, guid: 305ce238b2b1046428f16feb627d81a1, type: 3}
 --- !u!4 &2059200873
 Transform:
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 5501126015483507214, guid: 819f2b6b8a466bb47b10b0c8deb2062e, type: 3}
-  m_PrefabInstance: {fileID: 5501126017524243303}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2059200871}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -2455,8 +2459,8 @@ Transform:
 --- !u!114 &2059200874
 MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 5501126015483507213, guid: 819f2b6b8a466bb47b10b0c8deb2062e, type: 3}
-  m_PrefabInstance: {fileID: 5501126017524243303}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2059200871}
   m_Enabled: 1
@@ -2597,68 +2601,3 @@ CapsuleCollider2D:
   m_Offset: {x: -0.0023408008, y: -0.057311185}
   m_Size: {x: 5.976017, y: 1.1146492}
   m_Direction: 1
---- !u!1001 &5501126017524243303
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 5501126015483507200, guid: 819f2b6b8a466bb47b10b0c8deb2062e, type: 3}
-      propertyPath: m_Name
-      value: WaitingRoomManager
-      objectReference: {fileID: 0}
-    - target: {fileID: 5501126015483507214, guid: 819f2b6b8a466bb47b10b0c8deb2062e, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5501126015483507214, guid: 819f2b6b8a466bb47b10b0c8deb2062e, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5501126015483507214, guid: 819f2b6b8a466bb47b10b0c8deb2062e, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5501126015483507214, guid: 819f2b6b8a466bb47b10b0c8deb2062e, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5501126015483507214, guid: 819f2b6b8a466bb47b10b0c8deb2062e, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5501126015483507214, guid: 819f2b6b8a466bb47b10b0c8deb2062e, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5501126015483507214, guid: 819f2b6b8a466bb47b10b0c8deb2062e, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5501126015483507214, guid: 819f2b6b8a466bb47b10b0c8deb2062e, type: 3}
-      propertyPath: m_RootOrder
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 5501126015483507214, guid: 819f2b6b8a466bb47b10b0c8deb2062e, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5501126015483507214, guid: 819f2b6b8a466bb47b10b0c8deb2062e, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5501126015483507214, guid: 819f2b6b8a466bb47b10b0c8deb2062e, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5501126015483507215, guid: 819f2b6b8a466bb47b10b0c8deb2062e, type: 3}
-      propertyPath: playerCountText
-      value: 
-      objectReference: {fileID: 1157679502}
-    - target: {fileID: 5501126015483507215, guid: 819f2b6b8a466bb47b10b0c8deb2062e, type: 3}
-      propertyPath: blueTeamCount
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 819f2b6b8a466bb47b10b0c8deb2062e, type: 3}

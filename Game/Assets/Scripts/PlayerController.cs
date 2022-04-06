@@ -13,7 +13,8 @@ public class PlayerController : MonoBehaviour, IPunObservable
     public float clampMagnitude;
     public GameObject body, playerBall;
     public bool isAlive, isPaused, hasBall;
-
+    [HideInInspector]
+    public PhotonView view;
 
     [Header("UI Variables:")]
     public Text nameText;
@@ -28,7 +29,6 @@ public class PlayerController : MonoBehaviour, IPunObservable
     private float xScaleRight;
 
     private Rigidbody2D rb;
-    private PhotonView view;
     private GameManager gameManager;
     private Animator animator;
     private Vector3 mouse_pos;
@@ -139,6 +139,14 @@ public class PlayerController : MonoBehaviour, IPunObservable
     public void GetBall(GameObject ball)
     {
         dodgeBall = ball;
+        hasBall = true;
+        ball.GetComponent<DodeballScript>().view.RequestOwnership();
+
+        if(dodgeBall == null)
+        {
+            Debug.Log("errorOccured");
+        }
+
     }
 
     public void ChangeBallPosition()
@@ -157,19 +165,26 @@ public class PlayerController : MonoBehaviour, IPunObservable
             Vector2 dir = mouse_pos - dodgeBallSpawnTransform.position;
             dir.Normalize();
 
-            dodgeBall.transform.position = dodgeBallSpawnTransform.position;
-            dodgeBall.GetComponent<SpriteRenderer>().enabled = true;
-
+            DodeballScript dodgeBallScript = dodgeBall.GetComponent<DodeballScript>();
             Rigidbody2D ballRigidBody = dodgeBall.GetComponent<Rigidbody2D>();
-            Collider2D ballCollider = dodgeBall.GetComponent<Collider2D>();
 
-            ballCollider.isTrigger = true;
+            dodgeBallScript.isHidden = false;
             hasBall = false;
 
             //add force to the direction in which the ball is supposed to go
+            dodgeBall.transform.position = dodgeBallSpawnTransform.position;
             ballRigidBody.AddForce(dir * power);
-            dodgeBall = null;
+
+            Invoke("BallLeft", 2f);
         }
+    }
+
+    void BallLeft()
+    {
+        dodgeBall.GetComponent<DodeballScript>().isCollectable = true;
+        //dodgeBall.GetComponent<DodeballScript>().owner = null;
+        dodgeBall = null;
+        Debug.Log("Collectable");
     }
 
     public void DisableBall()
