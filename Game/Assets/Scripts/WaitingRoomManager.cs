@@ -23,15 +23,21 @@ public class WaitingRoomManager : MonoBehaviourPunCallbacks
     [Header("Team Info")]
     public int blueTeamCount;
     public int redTeamCount;
+    [ColorUsage(true)]
+    public Color redTeamColor;
+    [ColorUsage(true)]
+    public Color blueTeamColor;
 
-    private PhotonTeamsManager teamManager;
+    private PhotonTeamsManager photonTeamManager;
     private PhotonTeam[] teams;
     private PlayerController playerController;
+    private TeamManager teamManager;
 
     // Start is called before the first frame update
     void Start()
     {
-        teamManager = GetComponent<PhotonTeamsManager>();
+        teamManager = FindObjectOfType<TeamManager>();
+        //photonTeamManager = GetComponent<PhotonTeamsManager>();
 
         //spawn player
         Vector2 spawnPosition = new Vector2(Random.Range(minSpawnValues.x, maxSpawnValues.x), Random.Range(minSpawnValues.y, maxSpawnValues.y));
@@ -48,68 +54,68 @@ public class WaitingRoomManager : MonoBehaviourPunCallbacks
         playerController.name = PhotonNetwork.LocalPlayer.NickName;
         
         //assign player to an available team
-        teams = teamManager.GetAvailableTeams();
-        UpdatePlayerList();
-        AssignTeam();
+        //teams = photonTeamManager.GetAvailableTeams();
+        //UpdatePlayerList();
+        //AssignTeam();
     }
 
     // Update is called once per frame
     void Update()
     {
         TeamCount();
-        UpdatePlayerList();
+        //UpdatePlayerList();
     }
 
-    private void UpdatePlayerList()
-    {
-        blueTeamCount = 0;
-        redTeamCount = 0;
+    //private void UpdatePlayerList()
+    //{
+    //    blueTeamCount = 0;
+    //    redTeamCount = 0;
 
-        //for each player get there team and add them to the teams count
-        foreach (KeyValuePair<int, Player> player in PhotonNetwork.CurrentRoom.Players)
-        {
-            PhotonTeam playersTeam = player.Value.GetPhotonTeam();
+    //    //for each player get there team and add them to the teams count
+    //    foreach (KeyValuePair<int, Player> player in PhotonNetwork.CurrentRoom.Players)
+    //    {
+    //        PhotonTeam playersTeam = player.Value.GetPhotonTeam();
 
-            if (playersTeam == teams[0])
-            {
-                blueTeamCount++;
-            }
-            else if (playersTeam == teams[1])
-            {
-                redTeamCount++;
-            }
-        }
-    }
+    //        if (playersTeam == teams[0])
+    //        {
+    //            teamManager.blueTeamCount++;
+    //        }
+    //        else if (playersTeam == teams[1])
+    //        {
+    //            redTeamCount++;
+    //        }
+    //    }
+    //}
 
-    private void AssignTeam()
-    {
-        //assign local player to team with few players
-        if (blueTeamCount <= redTeamCount || blueTeamCount == redTeamCount)
-        {
-            PhotonNetwork.LocalPlayer.JoinTeam("Blue");
-            blueTeamCount++;
-        }
-        else
-        {
-            PhotonNetwork.LocalPlayer.JoinTeam("Red");
-            redTeamCount++;
-        }
-    }
+    //private void AssignTeam()
+    //{
+    //    //assign local player to team with few players
+    //    if (blueTeamCount <= redTeamCount || blueTeamCount == redTeamCount)
+    //    {
+    //        PhotonNetwork.LocalPlayer.JoinTeam("Blue");
+    //        blueTeamCount++;
+    //    }
+    //    else
+    //    {
+    //        PhotonNetwork.LocalPlayer.JoinTeam("Red");
+    //        redTeamCount++;
+    //    }
+    //}
 
     private void TeamCount()
     {
         currentNumerOfPlayers = PhotonNetwork.CurrentRoom.PlayerCount;
         
         //if both teams equal the same number of players, start the count down
-        if(blueTeamCount == redTeamCount && !isCountingDown && currentNumerOfPlayers != 1)
+        if(teamManager.blueTeamCount == teamManager.redTeamCount && !isCountingDown && currentNumerOfPlayers != 1)
         {
             StartCoroutine(CountDown());
         }
         
         //output how many players are needed
-        if(!isCountingDown && blueTeamCount != redTeamCount)
+        if(!isCountingDown && teamManager.blueTeamCount != teamManager.redTeamCount)
         {
-            playerCountText.text = "Players Needed:\n" + (Mathf.Abs(blueTeamCount - redTeamCount));
+            playerCountText.text = "Players Needed:\n" + (Mathf.Abs(teamManager.blueTeamCount - teamManager.redTeamCount));
         }
     }
 

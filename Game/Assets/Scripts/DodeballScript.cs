@@ -8,55 +8,56 @@ public class DodeballScript : MonoBehaviour, IPunObservable
 {
     public float speed = 25;
     public bool isCollectable = true;
-    public bool isDamageable = false;
-    public bool isHidden = false;
-    public PlayerController owner;
+    public bool isDamagable = false;
 
-    public Collider2D triggerCollider;
+    public Collider2D triggerCol;
     
     [HideInInspector]
     public  PhotonView view;
-    
-    private Rigidbody2D rb;
-    private SpriteRenderer spriteRenderer;
+    [HideInInspector]
+    public Rigidbody2D rb;
 
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         view = GetComponent<PhotonView>();
-        triggerCollider.GetComponent<Collider2D>();
-
-        spriteRenderer = GetComponent<SpriteRenderer>();
+        triggerCol.GetComponent<Collider2D>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        triggerCollider.enabled = isCollectable;
-
-        if (isHidden)
+        //Debug.Log(view.Owner.TagObject);
+        GameObject player = (GameObject)view.Owner.TagObject;
+        if (player != null && player.GetComponent<PlayerController>().hasBall)
         {
-            transform.position = new Vector2(100,100);
-            //owner.dodgeBall = gameObject;
+            isCollectable = false;
+        }
+
+        triggerCol.enabled = isCollectable;
+        if (!isCollectable && !isDamagable)
+        {
+            transform.position = new Vector2(100, 100);
         }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.GetComponent<PlayerController>() != null)
+        if (collision.gameObject.GetComponent<PlayerController>() != null &&
+            !collision.gameObject.GetComponent<PlayerController>().hasBall && isCollectable)
         {
-            PlayerController playerController = collision.gameObject.GetComponent<PlayerController>();
-
-            if (!playerController.hasBall && isCollectable)
-            {
-                //if collides with player cause the ball to disappear and player has ball equals true
-                //owner = playerController;
-                playerController.GetBall(gameObject);
-                isCollectable = false;
-                isHidden = true;
-            }
+            //if collides with player cause the ball to disappear and player has ball equals true
+            collision.gameObject.GetComponent<PlayerController>().hasBall = true;
+            collision.gameObject.GetComponent<PlayerController>().GetBall(gameObject);
         }
+    }
+
+    public IEnumerator DisConnectFromPlayer()
+    {
+        yield return new WaitForSeconds(2f);
+        isCollectable = true;
+        isDamagable = false;
     }
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
@@ -65,14 +66,12 @@ public class DodeballScript : MonoBehaviour, IPunObservable
         if (stream.IsWriting)
         {
             stream.SendNext(isCollectable);
-            stream.SendNext(isDamageable);
-            stream.SendNext(isHidden);
+            stream.SendNext(isDamagable);
         }
         else if (stream.IsReading)
         {
             isCollectable = ((bool)stream.ReceiveNext());
-            isDamageable = ((bool)stream.ReceiveNext());
-            isHidden = ((bool)stream.ReceiveNext());
+            isDamagable = ((bool)stream.ReceiveNext());
         }
     }
 }

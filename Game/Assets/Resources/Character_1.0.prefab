@@ -370,10 +370,15 @@ MonoBehaviour:
   speed: 1000
   clampMagnitude: 15
   body: {fileID: 833858340290377778}
-  parent: {fileID: 0}
+  playerBall: {fileID: 0}
   isAlive: 1
+  isPaused: 0
+  hasBall: 0
+  view: {fileID: 0}
   nameText: {fileID: 833858341878302331}
   canvas: {fileID: 6778589149937952000}
+  dodgeBallSpawnTransform: {fileID: 833858340085460029}
+  power: 150
 --- !u!95 &833858340290377737
 Animator:
   serializedVersion: 3
@@ -444,6 +449,9 @@ MonoBehaviour:
   - Type: 4
     SynchronizeType: 1
     Name: Idle
+  - Type: 9
+    SynchronizeType: 0
+    Name: Throw
   m_SynchronizeLayers:
   - SynchronizeType: 0
     LayerIndex: 0
@@ -466,6 +474,7 @@ MonoBehaviour:
   OwnershipTransfer: 0
   observableSearch: 2
   ObservedComponents:
+  - {fileID: 833858340290377742}
   - {fileID: 833858340290377739}
   - {fileID: 8836576010798390431}
   - {fileID: 4362739979580996836}

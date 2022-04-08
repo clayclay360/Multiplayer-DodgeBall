@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Photon.Pun;
+using Photon.Pun.UtilityScripts;
 using Photon.Realtime;
 
 public class PlayerController : MonoBehaviour, IPunObservable
@@ -13,15 +14,17 @@ public class PlayerController : MonoBehaviour, IPunObservable
     public float clampMagnitude;
     public GameObject body, playerBall;
     public bool isAlive, isPaused, hasBall;
-    [HideInInspector]
-    public PhotonView view;
+
+    [Header("Team Variables:")]
+    public Color teamColor;
+
+    public PhotonView view { get; set; }
 
     [Header("UI Variables:")]
     public Text nameText;
     public GameObject canvas;
 
     [Header("Ball Variables:")]
-    public GameObject dodgeBall;
     public Transform dodgeBallSpawnTransform;
     public float power;
 
@@ -47,6 +50,7 @@ public class PlayerController : MonoBehaviour, IPunObservable
 
         addPlayer();
         nameText.text = view.Owner.NickName;
+        view.Owner.TagObject = gameObject;
     }
 
     private void addPlayer()
@@ -66,25 +70,9 @@ public class PlayerController : MonoBehaviour, IPunObservable
             {
                 Movement();
             }
+        }
 
-            DisplayBall();
-            //ChangeBallPosition();
-        }
-    }
-
-    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-    {
-        //read and write state of the object
-        if (stream.IsWriting)
-        {
-            stream.Serialize(ref hasBall);
-            stream.SendNext(playerBall.activeSelf);
-        }
-        else if (stream.IsReading)
-        {
-            hasBall = (bool)stream.ReceiveNext();
-            playerBall.SetActive((bool)stream.ReceiveNext());
-        }
+        DisplayBall();
     }
 
     private void Movement()
@@ -120,75 +108,58 @@ public class PlayerController : MonoBehaviour, IPunObservable
     private void DisplayBall()
     {
         //if the player has a ball, display the ball
-        if (hasBall)
-        {
-            playerBall.SetActive(true);
+        playerBall.SetActive(hasBall);
 
-            //if player left clicks and is not paused, trigger the throwing animation
-            if (Input.GetMouseButtonDown(0) && !isPaused)
-            {
-                animator.SetTrigger("Throw");
-            }
-        }
-        else
+        //if player left clicks and is not paused, trigger the throwing animation
+        if (Input.GetMouseButtonDown(0) && !isPaused && hasBall && view.IsMine)
         {
-            playerBall.SetActive(false);
+            animator.SetTrigger("Throw");
         }
     }
 
     public void GetBall(GameObject ball)
     {
-        dodgeBall = ball;
-        hasBall = true;
         ball.GetComponent<DodeballScript>().view.RequestOwnership();
-
-        if(dodgeBall == null)
-        {
-            Debug.Log("errorOccured");
-        }
-
-    }
-
-    public void ChangeBallPosition()
-    {
-        if(dodgeBall != null && hasBall)
-        {
-            dodgeBall.transform.position = dodgeBallSpawnTransform.position;
-        }
+        ball.GetComponent<SpriteRenderer>().color = teamColor;
     }
 
     public void ThrowBall()
     {
-        if (view.IsMine)
+        DodeballScript[] ballControllers = FindObjectsOfType<DodeballScript>();
+        for (int i = 0; i < ballControllers.Length; i++)
         {
-            //get the direction
-            Vector2 dir = mouse_pos - dodgeBallSpawnTransform.position;
-            dir.Normalize();
+            if (ballControllers[i].view.AmOwner && !ballControllers[i].isCollectable)
+            {
+                ballControllers[i].isDamagable = true;
+                ballControllers[i].gameObject.transform.position = dodgeBallSpawnTransform.position;
 
-            DodeballScript dodgeBallScript = dodgeBall.GetComponent<DodeballScript>();
-            Rigidbody2D ballRigidBody = dodgeBall.GetComponent<Rigidbody2D>();
+                Vector2 dir = mouse_pos - dodgeBallSpawnTransform.position;
+                dir.Normalize();
+                ballControllers[i].rb.AddForce(mouse_pos * power);
 
-            dodgeBallScript.isHidden = false;
-            hasBall = false;
-
-            //add force to the direction in which the ball is supposed to go
-            dodgeBall.transform.position = dodgeBallSpawnTransform.position;
-            ballRigidBody.AddForce(dir * power);
-
-            Invoke("BallLeft", 2f);
+                StartCoroutine(ballControllers[i].DisConnectFromPlayer());
+                break;
+            }
         }
-    }
-
-    void BallLeft()
-    {
-        dodgeBall.GetComponent<DodeballScript>().isCollectable = true;
-        //dodgeBall.GetComponent<DodeballScript>().owner = null;
-        dodgeBall = null;
-        Debug.Log("Collectable");
     }
 
     public void DisableBall()
     {
-        playerBall.SetActive(true);
+        hasBall = false;
+    }
+
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        //read and write state of the object
+        if (stream.IsWriting)
+        {
+            stream.Serialize(ref hasBall);
+
+        }
+        else if (stream.IsReading)
+        {
+            hasBall = (bool)stream.ReceiveNext();
+
+        }
     }
 }

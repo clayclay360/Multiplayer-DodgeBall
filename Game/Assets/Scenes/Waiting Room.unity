@@ -200,6 +200,18 @@ PrefabInstance:
       propertyPath: sceneViewId
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 7757334719803975905, guid: 305ce238b2b1046428f16feb627d81a1, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7757334719803975905, guid: 305ce238b2b1046428f16feb627d81a1, type: 3}
+      propertyPath: m_Color.g
+      value: 0.0990566
+      objectReference: {fileID: 0}
+    - target: {fileID: 7757334719803975905, guid: 305ce238b2b1046428f16feb627d81a1, type: 3}
+      propertyPath: m_Color.b
+      value: 0.16877949
+      objectReference: {fileID: 0}
     - target: {fileID: 7757334719803975906, guid: 305ce238b2b1046428f16feb627d81a1, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -2411,6 +2423,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2059200873}
   - component: {fileID: 2059200872}
+  - component: {fileID: 2059200875}
   - component: {fileID: 2059200874}
   m_Layer: 0
   m_Name: WaitingRoomManager
@@ -2441,7 +2454,8 @@ MonoBehaviour:
   countDownTime: 15
   blueTeamCount: 0
   redTeamCount: 0
-  ballPrefab: {fileID: 7757334719803975910, guid: 305ce238b2b1046428f16feb627d81a1, type: 3}
+  redTeamColor: {r: 0, g: 0, b: 0, a: 0}
+  blueTeamColor: {r: 0, g: 0, b: 0, a: 0}
 --- !u!4 &2059200873
 Transform:
   m_ObjectHideFlags: 0
@@ -2474,6 +2488,22 @@ MonoBehaviour:
     Code: 1
   - Name: Red
     Code: 2
+--- !u!114 &2059200875
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2059200871}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e19888c6f4e10e4ebd4a4415775db24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  blueTeamCount: 0
+  redTeamCount: 0
+  redTeamColor: {r: 0, g: 0, b: 0, a: 0}
+  blueTeamColor: {r: 0, g: 0, b: 0, a: 0}
 --- !u!1 &2078131140
 GameObject:
   m_ObjectHideFlags: 0
