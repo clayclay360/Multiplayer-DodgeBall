@@ -15,6 +15,8 @@ public class TeamManager : MonoBehaviour, IPunObservable
     [ColorUsage(true)]
     public Color blueTeamColor;
 
+    public PlayerController playerController { get; set; }
+
     private PhotonTeamsManager teamManager;
     private PhotonTeam[] teams;
 
@@ -52,6 +54,20 @@ public class TeamManager : MonoBehaviour, IPunObservable
                 redTeamCount++;
             }
         }
+
+        PlayerController[] allPlayerControllers = FindObjectsOfType<PlayerController>();
+        foreach(PlayerController player in allPlayerControllers)
+        {
+            switch (player.teamName)
+            {
+                case "Red":
+                    player.teamColor = redTeamColor;
+                    break;
+                case "Blue":
+                    player.teamColor = blueTeamColor;
+                    break;
+            }
+        }
     }
 
     private void AssignTeam()
@@ -60,11 +76,13 @@ public class TeamManager : MonoBehaviour, IPunObservable
         if (blueTeamCount <= redTeamCount || blueTeamCount == redTeamCount)
         {
             PhotonNetwork.LocalPlayer.JoinTeam("Blue");
+            playerController.teamName = "Blue";
             blueTeamCount++;
         }
         else
         {
             PhotonNetwork.LocalPlayer.JoinTeam("Red");
+            playerController.teamName = "Red";
             redTeamCount++;
         }
     }

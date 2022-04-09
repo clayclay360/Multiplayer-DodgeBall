@@ -206,11 +206,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7757334719803975905, guid: 305ce238b2b1046428f16feb627d81a1, type: 3}
       propertyPath: m_Color.g
-      value: 0.0990566
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7757334719803975905, guid: 305ce238b2b1046428f16feb627d81a1, type: 3}
       propertyPath: m_Color.b
-      value: 0.16877949
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7757334719803975906, guid: 305ce238b2b1046428f16feb627d81a1, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2452,10 +2452,6 @@ MonoBehaviour:
   maxNumberOfPlayers: 8
   isCountingDown: 0
   countDownTime: 15
-  blueTeamCount: 0
-  redTeamCount: 0
-  redTeamColor: {r: 0, g: 0, b: 0, a: 0}
-  blueTeamColor: {r: 0, g: 0, b: 0, a: 0}
 --- !u!4 &2059200873
 Transform:
   m_ObjectHideFlags: 0
@@ -2502,8 +2498,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blueTeamCount: 0
   redTeamCount: 0
-  redTeamColor: {r: 0, g: 0, b: 0, a: 0}
-  blueTeamColor: {r: 0, g: 0, b: 0, a: 0}
+  redTeamColor: {r: 1, g: 0.0990566, b: 0.16877949, a: 1}
+  blueTeamColor: {r: 0.09803921, g: 0.61687124, b: 1, a: 1}
 --- !u!1 &2078131140
 GameObject:
   m_ObjectHideFlags: 0

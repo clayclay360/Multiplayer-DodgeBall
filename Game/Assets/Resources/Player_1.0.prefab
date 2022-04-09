@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 8120210248262442106}
   - component: {fileID: 1744047075239059283}
   - component: {fileID: -2146878571478459236}
+  - component: {fileID: 4036470080265480827}
   m_Layer: 0
   m_Name: Player_1.0
   m_TagString: Player
@@ -68,13 +69,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0082abe47489a34fb0e067080ff7381, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  name: 
+  playerName: 
   speed: 900
   clampMagnitude: 0
   body: {fileID: 0}
   isAlive: 0
+  isPaused: 0
+  hasBall: 0
+  teamName: 
+  teamColor: {r: 0, g: 0, b: 0, a: 0}
   nameText: {fileID: 0}
   canvas: {fileID: 0}
+  dodgeBallSpawnTransform: {fileID: 0}
+  playerBall: {fileID: 0}
+  power: 0
 --- !u!114 &1744047075239059283
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -94,7 +102,9 @@ MonoBehaviour:
   OwnershipTransfer: 0
   observableSearch: 2
   ObservedComponents:
+  - {fileID: 8120210248262442106}
   - {fileID: -2146878571478459236}
+  - {fileID: 4036470080265480827}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -131,6 +141,22 @@ MonoBehaviour:
     InterpolateOption: 0
     InterpolateMoveTowardsSpeed: 1
     InterpolateLerpSpeed: 0
+--- !u!114 &4036470080265480827
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8120210248262442104}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e7cb724808c322458aa4d15f5035fa9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SynchronizeVelocity: 1
+  m_SynchronizeAngularVelocity: 1
+  m_TeleportEnabled: 0
+  m_TeleportIfDistanceGreaterThan: 3
 --- !u!1 &8120210248549855993
 GameObject:
   m_ObjectHideFlags: 0

@@ -9,15 +9,15 @@ using Photon.Realtime;
 public class PlayerController : MonoBehaviour, IPunObservable
 {
     [Header("Player Variables:")]
-    public string name;
+    public string playerName;
     public float speed;
     public float clampMagnitude;
-    public GameObject body, playerBall;
+    public GameObject body;
     public bool isAlive, isPaused, hasBall;
 
     [Header("Team Variables:")]
+    public string teamName;
     public Color teamColor;
-
     public PhotonView view { get; set; }
 
     [Header("UI Variables:")]
@@ -26,6 +26,7 @@ public class PlayerController : MonoBehaviour, IPunObservable
 
     [Header("Ball Variables:")]
     public Transform dodgeBallSpawnTransform;
+    public GameObject playerBall;
     public float power;
 
     private float xScaleLeft;
@@ -110,6 +111,11 @@ public class PlayerController : MonoBehaviour, IPunObservable
         //if the player has a ball, display the ball
         playerBall.SetActive(hasBall);
 
+        if (hasBall)
+        {
+            playerBall.GetComponent<SpriteRenderer>().color = teamColor;
+        }
+
         //if player left clicks and is not paused, trigger the throwing animation
         if (Input.GetMouseButtonDown(0) && !isPaused && hasBall && view.IsMine)
         {
@@ -120,7 +126,6 @@ public class PlayerController : MonoBehaviour, IPunObservable
     public void GetBall(GameObject ball)
     {
         ball.GetComponent<DodeballScript>().view.RequestOwnership();
-        ball.GetComponent<SpriteRenderer>().color = teamColor;
     }
 
     public void ThrowBall()
@@ -135,7 +140,12 @@ public class PlayerController : MonoBehaviour, IPunObservable
 
                 Vector2 dir = mouse_pos - dodgeBallSpawnTransform.position;
                 dir.Normalize();
-                ballControllers[i].rb.AddForce(mouse_pos * power);
+                Debug.Log(dir * power);
+                ballControllers[i].rb.AddForce(dir * power, ForceMode2D.Force);
+
+
+
+                ballControllers[i].spriteColor = teamName;
 
                 StartCoroutine(ballControllers[i].DisConnectFromPlayer());
                 break;
@@ -154,12 +164,14 @@ public class PlayerController : MonoBehaviour, IPunObservable
         if (stream.IsWriting)
         {
             stream.Serialize(ref hasBall);
-
+            stream.Serialize(ref teamName);
+            stream.Serialize(ref playerName);
         }
         else if (stream.IsReading)
         {
             hasBall = (bool)stream.ReceiveNext();
-
+            teamName = (string)stream.ReceiveNext();
+            playerName = (string)stream.ReceiveNext();
         }
     }
 }
