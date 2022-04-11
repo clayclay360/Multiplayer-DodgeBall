@@ -13,8 +13,8 @@ public class PlayerController : MonoBehaviour, IPunObservable
     public float speed;
     public float clampMagnitude;
     public GameObject body;
-    public bool isAlive, isPaused, hasBall;
-
+    public bool isAlive, isPaused, hasBall, isOut;
+    public int lives = 3;
 
     [Header("Team Variables:")]
     public string teamName;
@@ -34,6 +34,7 @@ public class PlayerController : MonoBehaviour, IPunObservable
 
     private float xScaleLeft;
     private float xScaleRight;
+    private bool isDamagable;
 
     private Rigidbody2D rb;
     private GameManager gameManager;
@@ -70,12 +71,13 @@ public class PlayerController : MonoBehaviour, IPunObservable
     {
         if (view.IsMine)
         {
-            if (!isPaused)
+            if (!isPaused && !isOut)
             {
                 Movement();
             }
         }
         DisplayBall();
+        CheckLives();
     }
 
     private void Movement()
@@ -150,7 +152,7 @@ public class PlayerController : MonoBehaviour, IPunObservable
 
                 ballControllers[i].spriteColor = teamName;
 
-                StartCoroutine(ballControllers[i].DisConnectFromPlayer());
+                StartCoroutine(ballControllers[i].DisConnectFromPlayer(2));
                 break;
             }
         }
@@ -166,6 +168,41 @@ public class PlayerController : MonoBehaviour, IPunObservable
         PhotonNetwork.LoadLevel(index);
     }
 
+    public void CheckLives()
+    {
+        if (isOut)
+        {
+            transform.position = new Vector2(90, 90);
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if(collision.gameObject.GetComponent<DodeballScript>() != null &&
+            collision.gameObject.GetComponent<DodeballScript>().spriteColor != teamName &&
+            gameManager != null && !isOut && isDamagable)
+        {
+            lives -= 1;
+            isDamagable = false;
+            StartCoroutine(collision.gameObject.GetComponent<DodeballScript>().DisConnectFromPlayer(.25f));
+
+            if(lives <= 0)
+            {
+                isOut = true;
+                if (gameManager != null)
+                {
+                    gameManager.playersAlive--;
+                }
+            }
+        }
+    }
+
+    private IEnumerator Invulnerable()
+    {
+        yield return new WaitForSeconds(1);
+        isDamagable = true;
+    }
+
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
         //read and write state of the object
@@ -175,6 +212,7 @@ public class PlayerController : MonoBehaviour, IPunObservable
             stream.Serialize(ref teamName);
             stream.Serialize(ref playerName);
             stream.Serialize(ref ballName);
+            stream.Serialize(ref lives);
         }
         else if (stream.IsReading)
         {
@@ -182,6 +220,7 @@ public class PlayerController : MonoBehaviour, IPunObservable
             teamName = (string)stream.ReceiveNext();
             playerName = (string)stream.ReceiveNext();
             ballName = (string)stream.ReceiveNext();
+            lives = (int)stream.ReceiveNext();
         }
     }
 }

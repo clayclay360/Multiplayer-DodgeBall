@@ -79,9 +79,9 @@ public class DodeballScript : MonoBehaviour, IPunObservable
         }
     }
 
-    public IEnumerator DisConnectFromPlayer()
+    public IEnumerator DisConnectFromPlayer(float time)
     {
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(time);
         isCollectable = true;
         isDamagable = false;
         spriteColor = "";
