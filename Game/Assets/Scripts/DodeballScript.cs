@@ -6,6 +6,8 @@ using Photon.Pun;
 
 public class DodeballScript : MonoBehaviour, IPunObservable
 {
+
+    public string ballName;
     public float speed = 25;
     public bool isCollectable = true;
     public bool isDamagable = false;
@@ -33,7 +35,8 @@ public class DodeballScript : MonoBehaviour, IPunObservable
     void Update()
     {
         GameObject player = (GameObject)view.Owner.TagObject;
-        if (player != null && player.GetComponent<PlayerController>().hasBall)
+        if (player != null && player.GetComponent<PlayerController>().hasBall 
+            && player.GetComponent<PlayerController>().ballName.Equals(ballName))
         {
             isCollectable = false;
         }

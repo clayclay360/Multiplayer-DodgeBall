@@ -20,13 +20,19 @@ public class WaitingRoomManager : MonoBehaviourPunCallbacks
     public bool isCountingDown;
     public int countDownTime;
 
+    [Space]
+    public GameObject ball;
+
     private PlayerController currentPlayerController;
     private TeamManager teamManager;
 
     // Start is called before the first frame update
     void Start()
     {
+        PhotonNetwork.AutomaticallySyncScene = true;
         teamManager = FindObjectOfType<TeamManager>();
+
+        //PhotonNetwork.Instantiate(ball.name, Vector3.zero, Quaternion.identity);
 
         //spawn player
         Vector2 spawnPosition = new Vector2(Random.Range(minSpawnValues.x, maxSpawnValues.x), Random.Range(minSpawnValues.y, maxSpawnValues.y));
@@ -89,8 +95,10 @@ public class WaitingRoomManager : MonoBehaviourPunCallbacks
             //once i equals zero load the game scene
             if (i == 0)
             {
-                //PhotonNetwork.LoadLevel("Game");
-                Debug.Log("start game");
+                if (PhotonNetwork.IsMasterClient)
+                {
+                    PhotonNetwork.LoadLevel("Game");
+                }
             }
         }
     }

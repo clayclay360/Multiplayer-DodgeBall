@@ -366,18 +366,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0082abe47489a34fb0e067080ff7381, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  name: 
+  playerName: 
   speed: 1000
   clampMagnitude: 15
   body: {fileID: 833858340290377778}
-  playerBall: {fileID: 0}
   isAlive: 1
   isPaused: 0
   hasBall: 0
-  view: {fileID: 0}
+  teamName: 
+  teamColor: {r: 0, g: 0, b: 0, a: 0}
   nameText: {fileID: 833858341878302331}
   canvas: {fileID: 6778589149937952000}
   dodgeBallSpawnTransform: {fileID: 833858340085460029}
+  playerBall: {fileID: 0}
   power: 150
 --- !u!95 &833858340290377737
 Animator:

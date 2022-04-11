@@ -4,7 +4,7 @@ using UnityEngine;
 using Photon.Pun;
 using Photon.Pun.UtilityScripts;
 using Photon.Realtime;
-public class TeamManager : MonoBehaviour, IPunObservable
+public class TeamManager : MonoBehaviour
 {
 
     [Header("Team Info")]
@@ -14,7 +14,8 @@ public class TeamManager : MonoBehaviour, IPunObservable
     public Color redTeamColor;
     [ColorUsage(true)]
     public Color blueTeamColor;
-
+    [Space]
+    public bool isAssigningTeams;
     public PlayerController playerController { get; set; }
 
     private PhotonTeamsManager teamManager;
@@ -47,10 +48,12 @@ public class TeamManager : MonoBehaviour, IPunObservable
 
             if (playersTeam == teams[0])
             {
+                playerController.teamName = "Blue";
                 blueTeamCount++;
             }
             else if (playersTeam == teams[1])
             {
+                playerController.teamName = "Red";
                 redTeamCount++;
             }
         }
@@ -73,22 +76,16 @@ public class TeamManager : MonoBehaviour, IPunObservable
     private void AssignTeam()
     {
         //assign local player to team with few players
-        if (blueTeamCount <= redTeamCount || blueTeamCount == redTeamCount)
+        if (isAssigningTeams)
         {
-            PhotonNetwork.LocalPlayer.JoinTeam("Blue");
-            playerController.teamName = "Blue";
-            blueTeamCount++;
+            if (blueTeamCount <= redTeamCount || blueTeamCount == redTeamCount)
+            {
+                PhotonNetwork.LocalPlayer.JoinTeam("Blue");
+            }
+            else
+            {
+                PhotonNetwork.LocalPlayer.JoinTeam("Red");
+            }
         }
-        else
-        {
-            PhotonNetwork.LocalPlayer.JoinTeam("Red");
-            playerController.teamName = "Red";
-            redTeamCount++;
-        }
-    }
-
-    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-    {
-        throw new System.NotImplementedException();
     }
 }

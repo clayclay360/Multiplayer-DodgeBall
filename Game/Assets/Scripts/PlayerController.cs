@@ -15,6 +15,7 @@ public class PlayerController : MonoBehaviour, IPunObservable
     public GameObject body;
     public bool isAlive, isPaused, hasBall;
 
+
     [Header("Team Variables:")]
     public string teamName;
     public Color teamColor;
@@ -27,7 +28,9 @@ public class PlayerController : MonoBehaviour, IPunObservable
     [Header("Ball Variables:")]
     public Transform dodgeBallSpawnTransform;
     public GameObject playerBall;
+    
     public float power;
+    public string ballName;
 
     private float xScaleLeft;
     private float xScaleRight;
@@ -72,7 +75,6 @@ public class PlayerController : MonoBehaviour, IPunObservable
                 Movement();
             }
         }
-
         DisplayBall();
     }
 
@@ -126,6 +128,7 @@ public class PlayerController : MonoBehaviour, IPunObservable
     public void GetBall(GameObject ball)
     {
         ball.GetComponent<DodeballScript>().view.RequestOwnership();
+        ballName = ball.GetComponent<DodeballScript>().ballName;
     }
 
     public void ThrowBall()
@@ -133,14 +136,14 @@ public class PlayerController : MonoBehaviour, IPunObservable
         DodeballScript[] ballControllers = FindObjectsOfType<DodeballScript>();
         for (int i = 0; i < ballControllers.Length; i++)
         {
-            if (ballControllers[i].view.AmOwner && !ballControllers[i].isCollectable)
+            if (ballControllers[i].view.AmOwner && !ballControllers[i].isCollectable 
+                && ballName.Equals(ballControllers[i].ballName))
             {
                 ballControllers[i].isDamagable = true;
                 ballControllers[i].gameObject.transform.position = dodgeBallSpawnTransform.position;
 
                 Vector2 dir = mouse_pos - dodgeBallSpawnTransform.position;
                 dir.Normalize();
-                Debug.Log(dir * power);
                 ballControllers[i].rb.AddForce(dir * power, ForceMode2D.Force);
 
 
@@ -158,6 +161,11 @@ public class PlayerController : MonoBehaviour, IPunObservable
         hasBall = false;
     }
 
+    public void ChangeScene(int index)
+    {
+        PhotonNetwork.LoadLevel(index);
+    }
+
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
         //read and write state of the object
@@ -166,12 +174,14 @@ public class PlayerController : MonoBehaviour, IPunObservable
             stream.Serialize(ref hasBall);
             stream.Serialize(ref teamName);
             stream.Serialize(ref playerName);
+            stream.Serialize(ref ballName);
         }
         else if (stream.IsReading)
         {
             hasBall = (bool)stream.ReceiveNext();
             teamName = (string)stream.ReceiveNext();
             playerName = (string)stream.ReceiveNext();
+            ballName = (string)stream.ReceiveNext();
         }
     }
 }
