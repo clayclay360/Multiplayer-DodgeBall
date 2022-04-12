@@ -1701,11 +1701,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameStarted: 0
   roundOver: 0
-  playersAlive: 0
+  redTeamScore: 0
+  blueTeamScore: 0
+  redPlayersAlive: 0
+  bluePlayersAlive: 0
   startTimer: 3
   playerPrefab: {fileID: 4521325113029022743, guid: 3be5fc08440082141804ddbcdceed730, type: 3}
   startLine: {fileID: 2026110085}
   startTimerText: {fileID: 322518256}
+  winnerText: {fileID: 322518256}
   maxSpawnValues: {x: 5, y: 4}
   minSpawnValues: {x: -5, y: -4}
 --- !u!114 &1154611547

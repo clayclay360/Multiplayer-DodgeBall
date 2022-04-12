@@ -26,6 +26,7 @@ public class TeamManager : MonoBehaviour
     {
         teamManager = GetComponent<PhotonTeamsManager>();
         teams = teamManager.GetAvailableTeams();
+        
         UpdatePlayerList();
         AssignTeam();
     }
@@ -46,29 +47,34 @@ public class TeamManager : MonoBehaviour
         {
             PhotonTeam playersTeam = player.Value.GetPhotonTeam();
 
-            if (playersTeam == teams[0])
+            if (playersTeam != null)
             {
-                playerController.teamName = "Blue";
-                blueTeamCount++;
-            }
-            else if (playersTeam == teams[1])
-            {
-                playerController.teamName = "Red";
-                redTeamCount++;
+                    if (playersTeam == teams[0])
+                    {
+                        blueTeamCount++;
+                    }
+                    else if (playersTeam == teams[1])
+                    {
+                        redTeamCount++;
+                    }
             }
         }
 
-        PlayerController[] allPlayerControllers = FindObjectsOfType<PlayerController>();
-        foreach(PlayerController player in allPlayerControllers)
+        GameObject playerObject = (GameObject)PhotonNetwork.LocalPlayer.TagObject;
+        if (playerObject != null)
         {
-            switch (player.teamName)
+            PlayerController pc = playerObject.GetComponent<PlayerController>();
+            if (PhotonNetwork.LocalPlayer.GetPhotonTeam() != null)
             {
-                case "Red":
-                    player.teamColor = redTeamColor;
-                    break;
-                case "Blue":
-                    player.teamColor = blueTeamColor;
-                    break;
+                switch (PhotonNetwork.LocalPlayer.GetPhotonTeam().Name)
+                {
+                    case "Red":
+                        pc.teamName = "Red";
+                        break;
+                    case "Blue":
+                        pc.teamName = "Blue";
+                        break;
+                }
             }
         }
     }

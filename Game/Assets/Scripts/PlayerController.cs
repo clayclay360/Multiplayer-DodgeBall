@@ -38,6 +38,7 @@ public class PlayerController : MonoBehaviour, IPunObservable
 
     private Rigidbody2D rb;
     private GameManager gameManager;
+    private TeamManager teamManager;
     private Animator animator;
     private Vector3 mouse_pos;
 
@@ -48,6 +49,7 @@ public class PlayerController : MonoBehaviour, IPunObservable
         view = GetComponent<PhotonView>();
         animator = GetComponent<Animator>();
         gameManager = FindObjectOfType<GameManager>();
+        teamManager = FindObjectOfType<TeamManager>();
         canvas.GetComponent<Canvas>();
 
         xScaleRight = transform.localScale.x;
@@ -56,14 +58,23 @@ public class PlayerController : MonoBehaviour, IPunObservable
         addPlayer();
         nameText.text = view.Owner.NickName;
         view.Owner.TagObject = gameObject;
+        isDamagable = true;
     }
 
     private void addPlayer()
     {
-        if (gameManager != null)
-        {
-            gameManager.playersAlive++;
-        }
+        //if (gameManager != null)
+        //{
+        //    switch (teamName)
+        //    {
+        //        case "Red":
+        //            gameManager.redPlayersAlive++;
+        //            break;
+        //        case "Blue":
+        //            gameManager.bluePlayersAlive++;
+        //            break;
+        //    }
+        //}
     }
 
     // Update is called once per frame
@@ -78,6 +89,7 @@ public class PlayerController : MonoBehaviour, IPunObservable
         }
         DisplayBall();
         CheckLives();
+        TeamColor();
     }
 
     private void Movement()
@@ -174,6 +186,24 @@ public class PlayerController : MonoBehaviour, IPunObservable
         {
             transform.position = new Vector2(90, 90);
         }
+
+        if(lives > 0)
+        {
+            isOut = false;
+        }
+    }
+
+    public void TeamColor()
+    {
+        switch (teamName)
+        {
+            case "Red":
+                teamColor = teamManager.redTeamColor;
+                break;
+            case "Blue":
+                teamColor = teamManager.blueTeamColor;
+                break;
+        }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -184,15 +214,12 @@ public class PlayerController : MonoBehaviour, IPunObservable
         {
             lives -= 1;
             isDamagable = false;
-            StartCoroutine(collision.gameObject.GetComponent<DodeballScript>().DisConnectFromPlayer(.25f));
+            //StartCoroutine(collision.gameObject.GetComponent<DodeballScript>().DisConnectFromPlayer(.25f));
+            StartCoroutine(Invulnerable());
 
             if(lives <= 0)
             {
                 isOut = true;
-                if (gameManager != null)
-                {
-                    gameManager.playersAlive--;
-                }
             }
         }
     }
@@ -213,6 +240,7 @@ public class PlayerController : MonoBehaviour, IPunObservable
             stream.Serialize(ref playerName);
             stream.Serialize(ref ballName);
             stream.Serialize(ref lives);
+            stream.Serialize(ref isOut);
         }
         else if (stream.IsReading)
         {
@@ -221,6 +249,7 @@ public class PlayerController : MonoBehaviour, IPunObservable
             playerName = (string)stream.ReceiveNext();
             ballName = (string)stream.ReceiveNext();
             lives = (int)stream.ReceiveNext();
+            isOut = (bool)stream.ReceiveNext();
         }
     }
 }
