@@ -53,7 +53,8 @@ public class DodeballScript : MonoBehaviour, IPunObservable
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.GetComponent<PlayerController>() != null &&
-            !collision.gameObject.GetComponent<PlayerController>().hasBall && isCollectable)
+            !collision.gameObject.GetComponent<PlayerController>().hasBall && isCollectable &&
+            collision.gameObject.GetComponent<PlayerController>().isDamagable)
         {
             //if collides with player cause the ball to disappear and player has ball equals true
             collision.gameObject.GetComponent<PlayerController>().hasBall = true;
@@ -95,12 +96,14 @@ public class DodeballScript : MonoBehaviour, IPunObservable
             stream.SendNext(isCollectable);
             stream.SendNext(isDamagable);
             stream.Serialize(ref spriteColor);
+            stream.Serialize(ref ballName);
         }
         else if (stream.IsReading)
         {
             isCollectable = ((bool)stream.ReceiveNext());
             isDamagable = ((bool)stream.ReceiveNext());
             spriteColor = ((string)stream.ReceiveNext());
+            ballName = ((string)stream.ReceiveNext());
         }
     }
 }

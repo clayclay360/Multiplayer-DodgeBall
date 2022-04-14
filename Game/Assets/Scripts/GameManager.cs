@@ -24,9 +24,13 @@ public class GameManager : MonoBehaviour
     public Text startTimerText;
     public Text winnerText;
 
-    [Header("Spawn Variables:")]
+    [Header("Player Spawn Variables:")]
     public Vector2 maxSpawnValues;
     public Vector2 minSpawnValues;
+
+    [Header("Ball Spawn Variables")]
+    public GameObject dodgeBallPrefab;
+    public float[] pos_y;
 
     private string winningTeam;
 
@@ -49,17 +53,16 @@ public class GameManager : MonoBehaviour
         if (PhotonNetwork.LocalPlayer.GetPhotonTeam().Name.Equals("Blue"))
         {
             spawnPosition = new Vector2(-7.75f, Random.Range(minSpawnValues.y, maxSpawnValues.y));
-            Debug.Log(PhotonNetwork.LocalPlayer.GetPhotonTeam());
         }
         else
         {
             spawnPosition = new Vector2(7.75f, Random.Range(minSpawnValues.y, maxSpawnValues.y));
-            Debug.Log("Red Side");
         }
 
         #endregion
         GameObject character = PhotonNetwork.Instantiate(playerPrefab.name, spawnPosition, Quaternion.identity);
         GameObject player = character.GetComponentInChildren<PlayerController>().body;
+        character.GetComponentInChildren<PlayerController>().hasBall = false;
 
         //add the players nickname
         PhotonNetwork.LocalPlayer.NickName = PlayerPrefs.GetString("PlayerName");
@@ -67,6 +70,8 @@ public class GameManager : MonoBehaviour
         currentPlayerController.playerName = PhotonNetwork.LocalPlayer.NickName;
 
         teamManager.playerController = currentPlayerController;
+
+        PositionBalls();
         StartCoroutine(StartTimer());
     }
 
@@ -88,12 +93,11 @@ public class GameManager : MonoBehaviour
 
             if (time == 0)
             {
-                startTimerText.text = "Start!";
+                startTimerText.text = "Go!";
                 startLine.enabled = false;
                 yield return new WaitForSeconds(1);
                 startTimerText.text = "";
             }
-            //scoreBoard.SetActive(true);
             gameStarted = true;
             roundOver = false;
         }
@@ -124,23 +128,48 @@ public class GameManager : MonoBehaviour
 
             if (redPlayersAlive <= 0)
             {
-                winningTeam = "Red";
+                winningTeam = "Blue";
                 roundOver = true;
-                StartCoroutine(DisplayRoundWinner());
+                blueTeamScore++;
+                CheckScore();
             }
             else if (bluePlayersAlive <= 0)
             {
-                winningTeam = "Blue";
+                winningTeam = "Red";
                 roundOver = true;
-                StartCoroutine(DisplayRoundWinner());
+                redTeamScore++;
+                CheckScore();
             }
         }
+    }
+
+    private void CheckScore()
+    {
+        if (blueTeamScore - 2 >= redTeamScore ||
+                redTeamScore - 2 >= blueTeamScore)
+        {
+            StartCoroutine(DisplayGameWinner());
+        }
+        else if (roundOver)
+        {
+            StartCoroutine(DisplayRoundWinner());
+        }
+    }
+
+    private IEnumerator DisplayGameWinner()
+    {
+        yield return new WaitForSeconds(.5f);
+        winnerText.text = winningTeam + " Wins!";
+        yield return new WaitForSeconds(5f);
+        winnerText.text = winningTeam + "";
+        LoadScene(1);
+
     }
 
     private IEnumerator DisplayRoundWinner()
     {
         yield return new WaitForSeconds(.5f);
-        winnerText.text = winningTeam + "Wins The Round";
+        winnerText.text = winningTeam + " Wins The Round";
         yield return new WaitForSeconds(3f);
         winnerText.text = winningTeam + "";
         Restart();
@@ -153,21 +182,55 @@ public class GameManager : MonoBehaviour
         PlayerController[] allPlayers = FindObjectsOfType<PlayerController>();
         foreach(PlayerController player in allPlayers)
         {
+            player.lives = 3;
+            player.isOut = false;
+
             if (player.teamName.Equals("Blue"))
             {
                 spawnPosition = new Vector2(-7.75f, Random.Range(minSpawnValues.y, maxSpawnValues.y));
                 player.transform.position = spawnPosition;
-                Debug.Log("Blue Side");
             }
             else
             {
                 spawnPosition = new Vector2(7.75f, Random.Range(minSpawnValues.y, maxSpawnValues.y));
                 player.transform.position = spawnPosition;
-                Debug.Log("Red Side");
             }
-
-            player.lives = 3;
         }
+
+        PositionBalls();
         StartCoroutine(StartTimer());
+    }
+
+    private void LoadScene(int index)
+    {
+        if (PhotonNetwork.IsMasterClient)
+        {
+            PhotonNetwork.LoadLevel(index);
+        }
+    }
+
+    private void PositionBalls()
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            Vector2 spawnPosition = new Vector2(0, pos_y[i]);
+            if (!gameStarted)
+            {
+                if (PhotonNetwork.IsMasterClient)
+                {
+                    GameObject dodgeBall = PhotonNetwork.Instantiate(dodgeBallPrefab.name, spawnPosition, Quaternion.identity);
+                    dodgeBall.GetComponent<DodeballScript>().ballName = "Ball " + i;
+
+                }
+            }
+            else
+            {
+                DodeballScript[] dodgeBalls = FindObjectsOfType<DodeballScript>();
+                if (dodgeBalls[i].view.AmOwner)
+                {
+                    dodgeBalls[i].transform.position = spawnPosition;
+                }
+            }
+        }
     }
 }

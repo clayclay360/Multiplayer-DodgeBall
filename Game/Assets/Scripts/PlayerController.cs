@@ -15,6 +15,7 @@ public class PlayerController : MonoBehaviour, IPunObservable
     public GameObject body;
     public bool isAlive, isPaused, hasBall, isOut;
     public int lives = 3;
+    public bool isDamagable { get; set; }
 
     [Header("Team Variables:")]
     public string teamName;
@@ -34,7 +35,6 @@ public class PlayerController : MonoBehaviour, IPunObservable
 
     private float xScaleLeft;
     private float xScaleRight;
-    private bool isDamagable;
 
     private Rigidbody2D rb;
     private GameManager gameManager;
@@ -55,26 +55,9 @@ public class PlayerController : MonoBehaviour, IPunObservable
         xScaleRight = transform.localScale.x;
         xScaleLeft = -transform.localScale.x;
 
-        addPlayer();
         nameText.text = view.Owner.NickName;
         view.Owner.TagObject = gameObject;
         isDamagable = true;
-    }
-
-    private void addPlayer()
-    {
-        //if (gameManager != null)
-        //{
-        //    switch (teamName)
-        //    {
-        //        case "Red":
-        //            gameManager.redPlayersAlive++;
-        //            break;
-        //        case "Blue":
-        //            gameManager.bluePlayersAlive++;
-        //            break;
-        //    }
-        //}
     }
 
     // Update is called once per frame
@@ -187,9 +170,9 @@ public class PlayerController : MonoBehaviour, IPunObservable
             transform.position = new Vector2(90, 90);
         }
 
-        if(lives > 0)
+        if(lives <= 0)
         {
-            isOut = false;
+            isOut = true;
         }
     }
 
@@ -214,13 +197,8 @@ public class PlayerController : MonoBehaviour, IPunObservable
         {
             lives -= 1;
             isDamagable = false;
-            //StartCoroutine(collision.gameObject.GetComponent<DodeballScript>().DisConnectFromPlayer(.25f));
+            StartCoroutine(collision.gameObject.GetComponent<DodeballScript>().DisConnectFromPlayer(.75f));
             StartCoroutine(Invulnerable());
-
-            if(lives <= 0)
-            {
-                isOut = true;
-            }
         }
     }
 

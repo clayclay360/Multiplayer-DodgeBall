@@ -185,6 +185,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 617361df8fb2e2f4e86abdae47e3154a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ballName: 
   speed: 2
   isCollectable: 1
   isDamagable: 0

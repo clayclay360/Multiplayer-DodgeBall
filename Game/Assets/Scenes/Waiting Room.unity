@@ -198,7 +198,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -3826755556070540562, guid: 305ce238b2b1046428f16feb627d81a1, type: 3}
       propertyPath: sceneViewId
-      value: 1
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: -3826755556070540562, guid: 305ce238b2b1046428f16feb627d81a1, type: 3}
       propertyPath: OwnershipTransfer

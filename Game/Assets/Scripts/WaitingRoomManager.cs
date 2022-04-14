@@ -97,7 +97,13 @@ public class WaitingRoomManager : MonoBehaviourPunCallbacks
             {
                 if (PhotonNetwork.IsMasterClient)
                 {
-                    //PhotonNetwork.LoadLevel("Game");
+                    DodeballScript[] dodgeballs = FindObjectsOfType<DodeballScript>();
+                    foreach (DodeballScript db in dodgeballs)
+                    {
+                        Destroy(db.gameObject);
+                    }
+
+                    PhotonNetwork.LoadLevel("Game");
                 }
             }
         }
