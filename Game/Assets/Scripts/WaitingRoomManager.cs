@@ -100,7 +100,7 @@ public class WaitingRoomManager : MonoBehaviourPunCallbacks
                     DodeballScript[] dodgeballs = FindObjectsOfType<DodeballScript>();
                     foreach (DodeballScript db in dodgeballs)
                     {
-                        Destroy(db.gameObject);
+                         Destroy(db.gameObject);
                     }
 
                     PhotonNetwork.LoadLevel("Game");
@@ -114,10 +114,22 @@ public class WaitingRoomManager : MonoBehaviourPunCallbacks
         currentPlayerController.isPaused = !currentPlayerController.isPaused;
     }
 
-    public void ChangeScene(string scene)
+    public void ChangeScene(int index)
     {
         //change to the scene given in the parameter
+        if (PhotonNetwork.IsMasterClient)
+        {
+            for (int i = 1; i < PhotonNetwork.CurrentRoom.PlayerCount; i++)
+            {
+                if (PhotonNetwork.CurrentRoom.Players[i].ActorNumber != PhotonNetwork.LocalPlayer.ActorNumber)
+                {
+                    PhotonNetwork.SetMasterClient(PhotonNetwork.CurrentRoom.Players[i]);
+                    break;
+                }
+            }
+        }
+
         PhotonNetwork.LeaveRoom();
-        SceneManager.LoadScene(scene, LoadSceneMode.Single);
+        SceneManager.LoadScene(index, LoadSceneMode.Single);
     }
 }

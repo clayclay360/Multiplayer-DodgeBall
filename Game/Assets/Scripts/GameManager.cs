@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using Photon.Pun;
 using Photon.Realtime;
 using Photon.Pun.UtilityScripts;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -23,6 +24,7 @@ public class GameManager : MonoBehaviour
     public Collider2D startLine;
     public Text startTimerText;
     public Text winnerText;
+    public Text scoreText;
 
     [Header("Player Spawn Variables:")]
     public Vector2 maxSpawnValues;
@@ -128,6 +130,7 @@ public class GameManager : MonoBehaviour
 
             if (redPlayersAlive <= 0)
             {
+                Debug.LogError("Blue Wins");
                 winningTeam = "Blue";
                 roundOver = true;
                 blueTeamScore++;
@@ -135,6 +138,7 @@ public class GameManager : MonoBehaviour
             }
             else if (bluePlayersAlive <= 0)
             {
+                Debug.LogError("Red Wins");
                 winningTeam = "Red";
                 roundOver = true;
                 redTeamScore++;
@@ -154,12 +158,14 @@ public class GameManager : MonoBehaviour
         {
             StartCoroutine(DisplayRoundWinner());
         }
+
+        scoreText.text = "Points\n" + blueTeamScore +"-"+ redTeamScore;
     }
 
     private IEnumerator DisplayGameWinner()
     {
         yield return new WaitForSeconds(.5f);
-        winnerText.text = winningTeam + " Wins!";
+        winnerText.text = winningTeam + " Team Wins!";
         yield return new WaitForSeconds(5f);
         winnerText.text = winningTeam + "";
         LoadScene(1);
@@ -169,7 +175,7 @@ public class GameManager : MonoBehaviour
     private IEnumerator DisplayRoundWinner()
     {
         yield return new WaitForSeconds(.5f);
-        winnerText.text = winningTeam + " Wins The Round";
+        winnerText.text = winningTeam + " Team Wins The Round";
         yield return new WaitForSeconds(3f);
         winnerText.text = winningTeam + "";
         Restart();
@@ -177,13 +183,17 @@ public class GameManager : MonoBehaviour
 
     private void Restart()
     {
-        startLine.enabled = true;
-
         PlayerController[] allPlayers = FindObjectsOfType<PlayerController>();
         foreach(PlayerController player in allPlayers)
         {
+            player.hasBall = false;
             player.lives = 3;
             player.isOut = false;
+
+            foreach (Image img in player.heartImage)
+            {
+                img.enabled = true;
+            }
 
             if (player.teamName.Equals("Blue"))
             {
@@ -196,6 +206,8 @@ public class GameManager : MonoBehaviour
                 player.transform.position = spawnPosition;
             }
         }
+
+        startLine.enabled = true;
 
         PositionBalls();
         StartCoroutine(StartTimer());
@@ -228,9 +240,23 @@ public class GameManager : MonoBehaviour
                 DodeballScript[] dodgeBalls = FindObjectsOfType<DodeballScript>();
                 if (dodgeBalls[i].view.AmOwner)
                 {
+                    dodgeBalls[i].isCollectable = true;
+                    dodgeBalls[i].isDamagable = false;
                     dodgeBalls[i].transform.position = spawnPosition;
                 }
             }
         }
+    }
+
+    public void StateOfPause()
+    {
+        currentPlayerController.isPaused = !currentPlayerController.isPaused;
+    }
+
+    public void ChangeScene(int index)
+    {
+        //change to the scene given in the parameter
+        PhotonNetwork.LeaveRoom();
+        SceneManager.LoadScene(index, LoadSceneMode.Single);
     }
 }

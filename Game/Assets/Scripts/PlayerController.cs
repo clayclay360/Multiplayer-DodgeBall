@@ -15,6 +15,7 @@ public class PlayerController : MonoBehaviour, IPunObservable
     public GameObject body;
     public bool isAlive, isPaused, hasBall, isOut;
     public int lives = 3;
+    public Image[] heartImage;
     public bool isDamagable { get; set; }
 
     [Header("Team Variables:")]
@@ -25,6 +26,7 @@ public class PlayerController : MonoBehaviour, IPunObservable
     [Header("UI Variables:")]
     public Text nameText;
     public GameObject canvas;
+    public GameObject heartContainer;
 
     [Header("Ball Variables:")]
     public Transform dodgeBallSpawnTransform;
@@ -58,6 +60,8 @@ public class PlayerController : MonoBehaviour, IPunObservable
         nameText.text = view.Owner.NickName;
         view.Owner.TagObject = gameObject;
         isDamagable = true;
+
+        DisplayHearts();
     }
 
     // Update is called once per frame
@@ -70,6 +74,7 @@ public class PlayerController : MonoBehaviour, IPunObservable
                 Movement();
             }
         }
+        DisplayHearts();
         DisplayBall();
         CheckLives();
         TeamColor();
@@ -167,7 +172,23 @@ public class PlayerController : MonoBehaviour, IPunObservable
     {
         if (isOut)
         {
+            Vector2 currentPos = transform.position;
             transform.position = new Vector2(90, 90);
+
+            if (hasBall)
+            {
+                DodeballScript[] ballControllers = FindObjectsOfType<DodeballScript>();
+                for (int i = 0; i < ballControllers.Length; i++)
+                {
+                    if (ballControllers[i].view.AmOwner && !ballControllers[i].isCollectable
+                        && ballName.Equals(ballControllers[i].ballName))
+                    {
+                        ballControllers[i].transform.position = currentPos;
+                        ballControllers[i].isCollectable = true;
+                        hasBall = false;
+                    }
+                }
+            }
         }
 
         if(lives <= 0)
@@ -189,11 +210,32 @@ public class PlayerController : MonoBehaviour, IPunObservable
         }
     }
 
+    public void DisplayHearts()
+    {
+        if(gameManager == null)
+        {
+            heartContainer.SetActive(false);
+        }
+
+        for(int i =0; i < heartImage.Length; i++)
+        {
+            if (lives > i)
+            {
+                heartImage[i].enabled = true;
+            }
+            else
+            {
+                heartImage[i].enabled = false;
+            }
+        }
+    }
+
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if(collision.gameObject.GetComponent<DodeballScript>() != null &&
             collision.gameObject.GetComponent<DodeballScript>().spriteColor != teamName &&
-            gameManager != null && !isOut && isDamagable)
+            gameManager != null && !isOut && isDamagable && collision.gameObject.GetComponent<DodeballScript>().isDamagable &&
+            view.IsMine)
         {
             lives -= 1;
             isDamagable = false;
